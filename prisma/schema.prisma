@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Supplier {
+  id            String    @id @default(cuid())
+  name          String
+  contactPerson String
+  email         String
+  phone         String
+  address       String
+  country       String
+  requests      Request[]
+}
+
+model Request {
+  id                  String       @id @default(cuid())
+  title               String
+  requestNumber       String       @unique
+  status              RequestStatus @default(DRAFT)
+  createdAt           DateTime     @default(now())
+  validUntil          DateTime?
+  notes               String?
+  contactPersonFirstName String?
+  contactPersonLastName  String?
+  contactPersonEmail     String?
+  contactPersonPhone     String?
+  
+  supplier   Supplier   @relation(fields: [supplierId], references: [id])
+  supplierId String
+  items      RequestItem[]
+}
+
+model RequestItem {
+  id            String   @id @default(cuid())
+  articleNumber String?
+  designation   String
+  quantity      Int
+  
+  request   Request @relation(fields: [requestId], references: [id])
+  requestId String
+}
+
+enum RequestStatus {
+  DRAFT
+  SENT
+  COMPLETED
+  CANCELLED
+}
